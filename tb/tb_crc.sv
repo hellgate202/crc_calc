@@ -3,13 +3,13 @@ module tb_crc;
 
 parameter CLK_T             = 10000;
 
-parameter [63:0] POLY       = 16'h8005;
+parameter [63:0] POLY       = 16'h1021;
 parameter        CRC_SIZE   = 16;
 parameter        DATA_WIDTH = 8;
-parameter [63:0] INIT       = 16'h0000;
-parameter        REF_IN     = "TRUE";
-parameter        REF_OUT    = "TRUE";
-parameter [63:0] XOR_OUT    = 16'hffff;
+parameter [63:0] INIT       = 16'hffff;
+parameter        REF_IN     = 1;
+parameter        REF_OUT    = 1;
+parameter [63:0] XOR_OUT    = 16'h0000;
 
 logic                  clk;
 logic                  rst;

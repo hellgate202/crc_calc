@@ -29,62 +29,83 @@ always_ff @( posedge clk_i )
       if( valid_i )
         crc <= crc_next;
 
-int i, j;
-
 assign crc_o = crc ^ XOR_OUT[CRC_SIZE - 1 : 0];
 
 generate
-  begin : calc_gen
-    always_comb
-      begin
-        crc_next = crc;
-        crc_prev = crc;
-        if( REF_OUT )
-          for( i = 0; i < DATA_WIDTH; i++ )
-            if( REF_IN )
+  if( REF_OUT )
+    if( REF_IN )
+      begin : ref_out_ref_in
+        always_comb
+          begin
+            crc_next = crc;
+            crc_prev = crc;
+            for( int i = 0 ; i < DATA_WIDTH; i++ )
               begin
                 crc_next[CRC_SIZE - 1] = crc_prev[0] ^ data_i[i];
-                for( j = 1; j < CRC_SIZE; j++ )
+                for( int j = 1; j < CRC_SIZE; j++ )
                   if( POLY[j] )
                     crc_next[CRC_SIZE - 1 - j] = crc_prev[CRC_SIZE - j] ^ crc_prev[0] ^ data_i[i];
                   else
                     crc_next[CRC_SIZE - 1 - j] = crc_prev[CRC_SIZE - j]; 
                  crc_prev = crc_next;
               end
-            else
+          end
+      end
+    else
+      begin : ref_out_n_ref_in
+        always_comb
+          begin
+            crc_next = crc;
+            crc_prev = crc;
+            for( int i = 0; i < DATA_WIDTH; i++ )
               begin
                 crc_next[0] = crc_prev[CRC_SIZE - 1] ^ data_i[i];
-                for( j = 1; j < CRC_SIZE; j++ )
+                for( int j = 1; j < CRC_SIZE; j++ )
                   if( POLY[j] )
                     crc_next[j] = crc_prev[j - 1] ^ crc_prev[CRC_SIZE - 1] ^ data_i[i];
                   else
                     crc_next[j] = crc_prev[j - 1];
                 crc_prev = crc_next;
               end
-        else
-          for( i = 0; i < DATA_WIDTH; i++ )
-            if( REF_IN )
+          end
+      end
+  else
+    if( REF_IN )
+      begin : n_ref_out_ref_in
+        always_comb
+          begin
+            crc_next = crc;
+            crc_prev = crc;
+            for( int i = 0; i < DATA_WIDTH; i ++ )
               begin
                 crc_next[CRC_SIZE - 1] = crc_prev[0] ^ data_i[ DATA_WIDTH - 1 - i];
-                for( j = 1; j < CRC_SIZE; j++ )
+                for( int j = 1; j < CRC_SIZE; j++ )
                   if( POLY[j] )
                     crc_next[CRC_SIZE - 1 - j] = crc_prev[CRC_SIZE - j] ^ crc_prev[0] ^ data_i[DATA_WIDTH - 1 - i];
                   else
                     crc_next[CRC_SIZE - 1 - j] = crc_prev[CRC_SIZE - j];
                 crc_prev = crc_next;
               end
-            else
+          end
+      end
+    else
+      begin : n_ref_out_n_ref_in
+        always_comb
+          begin
+            crc_next = crc;
+            crc_prev = crc;
+            for( int i = 0; i < DATA_WIDTH; i ++ )
               begin
                 crc_next[0] = crc_prev[CRC_SIZE - 1] ^ data_i[DATA_WIDTH - 1 - i];
-                for( j = 1; j < CRC_SIZE; j++ )
+                for( int j = 1; j < CRC_SIZE; j++ )
                   if( POLY[j] )
                     crc_next[j] = crc_prev[j - 1] ^ crc_prev[CRC_SIZE - 1] ^ data_i[DATA_WIDTH - 1 - i];
                   else
                     crc_next[j] = crc_prev[j - 1];
                 crc_prev = crc_next;
               end
+          end
       end
-  end
 endgenerate
 
 endmodule
